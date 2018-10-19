@@ -22,8 +22,10 @@ func main() {
 	dest := os.Args[3]
 
 	if os.Args[1] == "1" {
-
+		go client()
+		server()
 	} else {
-
+		go server()
+		client()
 	}
 }
