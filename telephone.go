@@ -2,10 +2,15 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"os"
 )
 
-func client() {
+func client(input chan string, ipaddr string) {
+	conn, err := net.Dial("tcp", ipaddr)
+	if err != nil {
+		panic(err)
+	}
 
 }
 
@@ -21,11 +26,13 @@ func main() {
 	source := os.Args[2]
 	dest := os.Args[3]
 
+	comm := make(chan string)
+
 	if os.Args[1] == "1" {
-		go client()
+		go client(comm, dest)
 		server()
 	} else {
 		go server()
-		client()
+		client(comm, dest)
 	}
 }
