@@ -18,15 +18,31 @@ func client(input chan string, ipaddr string) {
 	nin := bufio.NewScanner(bufio.NewReader(conn))
 	nin.Split(bufio.ScanWords)
 	nin.Scan()
+	//Check for HELLO
 	if nin.Text() != "HELLO" {
 		fmt.Println("Telephone handshake failed")
 		fmt.Fprintf(conn, "QUIT\n")
+		nin.Scan()
+		if nin.Text() == "GOODBYE" {
+			return
+		}
+		return
 	}
 	nin.Scan()
-
+	//Check version number
 	if nin.Text() != VERSION {
 		fmt.Println("Client version incompatable: " + VERSION + " server version: " + nin.Text())
 		fmt.Fprintf(conn, "QUIT\n")
+		nin.Scan()
+		if nin.Text() == "GOODBYE" {
+			return
+		}
+		return
+	}
+
+	//Handle connection forever
+	for {
+
 	}
 
 }
