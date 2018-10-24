@@ -30,7 +30,11 @@ import "C"
 const VERSION string = "1.7"
 
 func checksum(in string) uint16 {
+	fmt.Println(len(in))
 	var tmp C.size_t = C.size_t(len(in) + 1)
+	if len(in) == 0 {
+		return 0
+	}
 	return uint16(C.checksum(unsafe.Pointer(C.CString(in)), tmp))
 }
 
@@ -42,12 +46,23 @@ func readHeaders(in string) map[string]string {
 	} else {
 		sin := bufio.NewScanner(strings.NewReader(in))
 		sin.Split(bufio.ScanWords)
-		sin.Scan()
-		sin.Scan()
-		m["Hop"] = sin.Text()
-		sin.Scan()
-		sin.Scan()
-		m["MessageId"] = sin.Text()
+		for {
+			if !sin.Scan() {
+				return m
+			}
+			_, in := m["Hop"]
+			if sin.Text() == "Hop:" && !in {
+				sin.Scan()
+				m["Hop"] = sin.Text()
+				continue
+			}
+			_, in = m["MessageId"]
+			if sin.Text() == "MessageId:" && !in {
+				sin.Scan()
+				m["MessageId"] = sin.Text()
+				continue
+			}
+		}
 	}
 
 	return m
@@ -133,7 +148,7 @@ func client(input chan string, source string, ipaddr string) {
 }
 
 func server(output chan string) {
-	output <- "Hop: 1\r\nMessageId: 3456\r\nFromHost: 192.168.0.12:9879\r\nToHost: 192.168.0.4:8888\r\nSystem: WINDOWS/XP\r\nProgram: JAVA/JAVAC\r\nAuthor: Frodo Baggins\r\nSendingTimestamp: 17:00:00:000\r\nMessageChecksum: 432F\r\nHeadersChecksum: A350\r\n\r\nHi how are you? I'm good.\r\n.\r\n"
+	output <- "Hop: 1\r\nMessageId: 3456\r\nFromHost: 192.168.0.12:9879\r\nToHost: 192.168.0.4:8888\r\nSystem: WINDOWS/XP\r\nProgram: JAVA/JAVAC\r\nAuthor: Frodo Baggins\r\nSendingTimestamp: 17:00:00:000\r\nMessageChecksum: 432F\r\nHeadersChecksum: A350\r\nHop: 0\r\nMessageId: 3456\r\nFromHost: 192.168.0.1:34953\r\nToHost: 192.168.0.12:8888\r\nSystem: LINIX/DEBIAN/R3.0\r\nProgram: C++/GCC\r\nAuthor: Alex, J./Jacky Elton/David Wang\r\nSendingTimestamp: 16:59:59:009\r\nMessageChecksum: 423F\r\nHeadersChecksum: 6F38\r\n\r\nHi how are you? I'm good.\r\n.\r\n"
 
 }
 
