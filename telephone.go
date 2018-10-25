@@ -12,9 +12,9 @@ import (
 	"unsafe"
 )
 
-//#include <stddef.h>
-//#include <stdint.h>
-//uint16_t checksum(void *data, size_t size) {
+// #include <stddef.h>
+// #include <stdint.h>
+// uint16_t checksum(void *data, size_t size) {
 // uint32_t sum = 0;
 // uint16_t *data16 = data;
 // while(size > 0) {
@@ -30,7 +30,6 @@ import "C"
 const VERSION string = "1.7"
 
 func checksum(in string) uint16 {
-	fmt.Println(len(in))
 	var tmp C.size_t = C.size_t(len(in) + 1)
 	if len(in) == 0 {
 		return 0
@@ -94,11 +93,11 @@ func addHeaders(input string, srcIp string, destIp string) string {
 	out += "FromHost: " + srcIp + "\r\n"
 	out += "ToHost: " + destIp + "\r\n"
 	out += "System: " + runtime.GOOS + "\r\n"
-	out += "Program: Golang/Go\r\n"
+	out += "Program: Golang/Go1.9,4\r\n"
 	out += "Author: Hunter Bashaw/Abigail Matthews\r\n"
 	out += "SendingTimestamp: " + strings.Replace(t.Format("15:04:05.000"), ".", ":", -1) + "\r\n"
 	out += "MessageChecksum: " + chs + "\r\n"
-	out += "HeaderChecksum: " + "\r\n"
+	//Header checksum
 	//Warning
 	//Transform
 	out += input
@@ -136,20 +135,32 @@ func client(input chan string, source string, ipaddr string) {
 		return
 	}
 
-	fmt.Fprintf(conn, "DATA\r\n")
-	final := addHeaders(<-input, source, ipaddr)
-	fmt.Fprintf(conn, final)
-
-	//Handle connection forever
 	for {
+		data := <-input
+		if data == "SIGTERM" {
+			fmt.Fprintf(conn, "QUIT\r\n")
+			nin.Scan()
+			if nin.Text() == "GOODBYE" {
+				return
+			}
+			return
+		}
+		fmt.Fprintf(conn, "DATA\r\n")
+		final := addHeaders(data, source, ipaddr)
+		fmt.Fprintf(conn, final)
 
+		//Get either SUCCESS or WARN
+		nin.Scan()
+		if nin.Text() == "WARN" {
+			fmt.Println("Server warned of checksum failure")
+		}
 	}
 
 }
 
 func server(output chan string) {
 	output <- "Hop: 1\r\nMessageId: 3456\r\nFromHost: 192.168.0.12:9879\r\nToHost: 192.168.0.4:8888\r\nSystem: WINDOWS/XP\r\nProgram: JAVA/JAVAC\r\nAuthor: Frodo Baggins\r\nSendingTimestamp: 17:00:00:000\r\nMessageChecksum: 432F\r\nHeadersChecksum: A350\r\nHop: 0\r\nMessageId: 3456\r\nFromHost: 192.168.0.1:34953\r\nToHost: 192.168.0.12:8888\r\nSystem: LINIX/DEBIAN/R3.0\r\nProgram: C++/GCC\r\nAuthor: Alex, J./Jacky Elton/David Wang\r\nSendingTimestamp: 16:59:59:009\r\nMessageChecksum: 423F\r\nHeadersChecksum: 6F38\r\n\r\nHi how are you? I'm good.\r\n.\r\n"
-
+	output <- "SIGTERM"
 }
 
 func main() {
