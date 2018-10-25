@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
 	"runtime"
 	"strconv"
 	"strings"
@@ -160,7 +161,7 @@ func client(input chan string, source string, ipaddr string) {
 
 func server(output chan string) {
 	output <- "Hop: 1\r\nMessageId: 3456\r\nFromHost: 192.168.0.12:9879\r\nToHost: 192.168.0.4:8888\r\nSystem: WINDOWS/XP\r\nProgram: JAVA/JAVAC\r\nAuthor: Frodo Baggins\r\nSendingTimestamp: 17:00:00:000\r\nMessageChecksum: 432F\r\nHeadersChecksum: A350\r\nHop: 0\r\nMessageId: 3456\r\nFromHost: 192.168.0.1:34953\r\nToHost: 192.168.0.12:8888\r\nSystem: LINIX/DEBIAN/R3.0\r\nProgram: C++/GCC\r\nAuthor: Alex, J./Jacky Elton/David Wang\r\nSendingTimestamp: 16:59:59:009\r\nMessageChecksum: 423F\r\nHeadersChecksum: 6F38\r\n\r\nHi how are you? I'm good.\r\n.\r\n"
-	output <- "SIGTERM"
+	// output <- "SIGTERM"
 }
 
 func main() {
@@ -172,6 +173,13 @@ func main() {
 	dest := os.Args[3]
 
 	comm := make(chan string)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for _ = range c {
+			comm <- "SIGTERM"
+		}
+	}()
 
 	if os.Args[1] == "1" {
 		go client(comm, source, dest)
