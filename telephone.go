@@ -113,7 +113,7 @@ func addHeaders(input string, srcIp string, destIp string) string {
 	out += "FromHost: " + srcIp + "\r\n"
 	out += "ToHost: " + destIp + "\r\n"
 	out += "System: " + runtime.GOOS + "\r\n"
-	out += "Program: Golang/Go1.9,4\r\n"
+	out += "Program: Golang/Go1.9.4\r\n"
 	out += "Author: Hunter Bashaw/Abigail Matthews\r\n"
 	out += "SendingTimestamp: " + strings.Replace(t.Format("15:04:05.000"), ".", ":", -1) + "\r\n"
 	out += "MessageChecksum: " + chs + "\r\n"
