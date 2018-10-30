@@ -15,16 +15,16 @@ import (
 
 // #include <stddef.h>
 // #include <stdint.h>
-// uint16_t checksum(void *data, size_t size) {
-// uint32_t sum = 0;
-// uint16_t *data16 = data;
-// while(size > 0) {
-// sum += *data16++;
-// size -= 2;
+// #include <string.h>
+// unsigned short checksum(void *data, unsigned long size) {
+// unsigned long sum = 0, i = 0;
+// unsigned char *udata = data;
+// while(i < size) {
+// sum += udata[i] << ( (i&1) ? 0 : 8 );
+// i++;
 // }
-// if(size > 0) sum += *((uint8_t *) data16);
 // while(sum >> 16) sum = (sum & 0xFFFF) + (sum >> 16);
-// return ~sum;
+// return ~((unsigned short) sum);
 // }
 import "C"
 
@@ -32,12 +32,12 @@ const VERSION string = "1.7"
 
 func checksum(in string) uint16 {
 	fmt.Println("|" + in + "|")
-	var tmp C.size_t = C.size_t(len(in))
+	// var size C.size_t = C.size_t(len(in))
 	if len(in) == 0 {
 		return 0
 	}
 	cstring := C.CString(in)
-	temp := C.checksum(unsafe.Pointer(cstring), tmp)
+	temp := C.checksum(unsafe.Pointer(cstring), C.strlen(cstring))
 	return uint16(temp)
 }
 
@@ -92,7 +92,7 @@ func extractMess(in string) string {
 		if in[i] == '\r' && in[i+1] == '\n' && in[i+2] == '\r' && in[i+3] == '\n' {
 			for j := i; j+4 < len(in); j++ {
 				if in[j] == '\r' && in[j+1] == '\n' && in[j+2] == '.' && in[j+3] == '\r' && in[j+4] == '\n' {
-					return in[i+4 : j-1]
+					return in[i+4 : j]
 				}
 			}
 		}
