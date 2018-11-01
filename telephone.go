@@ -31,8 +31,6 @@ import "C"
 const VERSION string = "1.7.1"
 
 func checksum(in string) uint16 {
-	// fmt.Println("|" + in + "|")
-	// var size C.size_t = C.size_t(len(in))
 	if len(in) == 0 {
 		return 0
 	}
@@ -79,7 +77,6 @@ func readHeaders(in string) map[string]string {
 		SendingTimestamps := make([]string, 0)
 
 		for {
-			//fmt.Println("second for")
 			if !sin.Scan() {
 				_, in := m["System"]
 
@@ -103,7 +100,6 @@ func readHeaders(in string) map[string]string {
 				}
 				if !in {
 					m["System"] = systemString
-					//fmt.Println(systemString)
 				}
 
 				_, in = m["Program"]
@@ -126,7 +122,6 @@ func readHeaders(in string) map[string]string {
 				}
 				if !in {
 					m["Program"] = programString
-					//fmt.Println(systemString)
 				}
 
 				_, in = m["Authors"]
@@ -149,7 +144,6 @@ func readHeaders(in string) map[string]string {
 				}
 				if !in {
 					m["Author"] = authorString
-					//fmt.Println(systemString)
 				}
 
 				_, in = m["Warning"]
@@ -172,7 +166,6 @@ func readHeaders(in string) map[string]string {
 				}
 				if !in {
 					m["Warning"] = warningString
-					//fmt.Println(systemString)
 				}
 
 				_, in = m["Transform"]
@@ -195,7 +188,6 @@ func readHeaders(in string) map[string]string {
 				}
 				if !in {
 					m["Transform"] = transformString
-					//fmt.Println(systemString)
 				}
 
 				_, in = m["FromHost"]
@@ -218,7 +210,6 @@ func readHeaders(in string) map[string]string {
 				}
 				if !in {
 					m["FromHost"] = fromHostString
-					//fmt.Println(systemString)
 				}
 
 				_, in = m["ToHost"]
@@ -241,7 +232,6 @@ func readHeaders(in string) map[string]string {
 				}
 				if !in {
 					m["ToHost"] = toHostString
-					//fmt.Println(systemString)
 				}
 
 				_, in = m["SendingTimestamp"]
@@ -264,7 +254,6 @@ func readHeaders(in string) map[string]string {
 				}
 				if !in {
 					m["SendingTimestamp"] = sendingTimestampString
-					//fmt.Println(systemString)
 				}
 
 				return m
@@ -435,7 +424,6 @@ func client(input chan string, source string, ipaddr string, origin int) {
 		}
 		//Get data to send from the channel connecting the client and server
 		data := <-input
-		fmt.Println("Client: " + data)
 		//If data is SIGTERM then close the connection and end program
 		if data == "SIGTERM" {
 			fmt.Fprintf(conn, "QUIT\r\n")
@@ -470,18 +458,15 @@ func client(input chan string, source string, ipaddr string, origin int) {
 }
 
 func server(output chan string, source string, dest string, isOriginator string) {
-	// ip_port := strings.SplitAfter(source, ":")
 	//Start listening on Port
 	c, err := net.Listen("tcp", source)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("listen")
 	//Close connection at end of function
 	defer c.Close()
 	//Accept Conenction
 	conn, err := c.Accept()
-	fmt.Println("accepted")
 	if isOriginator == "0" {
 		go client(output, source, dest, 0)
 	}
@@ -490,7 +475,6 @@ func server(output chan string, source string, dest string, isOriginator string)
 	conn.Write([]byte("HELLO " + VERSION + "\r\n"))
 	//get response from client
 	nin := bufio.NewScanner(bufio.NewReader(conn))
-	//nin.Split(bufio.ScanWords)
 	nin.Scan()
 	if nin.Text() != "HELLO 1.7.1" { //change to check global version number
 		conn.Write([]byte("NOK Unsupported version!\r\n"))
@@ -525,9 +509,7 @@ func server(output chan string, source string, dest string, isOriginator string)
 			conn.Write([]byte("NOK Unknown Command!\r\n"))
 		}
 		nChecksum := checksum(extractMess(mesg))
-		// fmt.Println("Made checksum")
 		oChecksum := readMesgChecksum(mesg)
-		// fmt.Println("read Checksum")
 
 		if isOriginator == "1" {
 			if nChecksum == oChecksum {
@@ -640,7 +622,5 @@ func main() {
 		server(comm, source, dest, os.Args[1])
 	} else {
 		server(comm, source, dest, os.Args[1])
-		// time.Sleep(time.Second * 3)
-		// client(comm, source, dest, 0)
 	}
 }
