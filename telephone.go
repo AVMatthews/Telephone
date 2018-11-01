@@ -457,17 +457,23 @@ func client(input chan string, source string, ipaddr string, origin int) {
 
 }
 
-func server(output chan string, source string, isOriginator string) {
-	ip_port := strings.SplitAfter(source, ":")
+func server(output chan string, source string, dest string, isOriginator string) {
+	// ip_port := strings.SplitAfter(source, ":")
 	//Start listening on Port
-	c, err := net.Listen("tcp", "localhost:"+ip_port[1])
+	c, err := net.Listen("tcp", source)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("listen")
 	//Close connection at end of function
 	defer c.Close()
 	//Accept Conenction
 	conn, err := c.Accept()
+	fmt.Println("accepted")
+	if isOriginator == "0" {
+		go client(output, source, dest, 0)
+	}
+
 	//Send HELLO <version#>
 	conn.Write([]byte("HELLO " + VERSION + "\r\n"))
 	//get response from client
@@ -610,9 +616,10 @@ func main() {
 
 	if os.Args[1] == "1" {
 		go client(comm, source, dest, 1)
-		server(comm, source, os.Args[1])
+		server(comm, source, dest, os.Args[1])
 	} else {
-		go server(comm, source, os.Args[1])
-		client(comm, source, dest, 0)
+		server(comm, source, dest, os.Args[1])
+		// time.Sleep(time.Second * 3)
+		// client(comm, source, dest, 0)
 	}
 }
