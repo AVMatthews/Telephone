@@ -399,6 +399,17 @@ func client(input chan string, source string, ipaddr string) {
 		fmt.Fprintf(conn, out)
 	}
 
+	nin = bufio.NewScanner(bufio.NewReader(conn))
+	nin.Split(bufio.ScanWords)
+	nin.Scan()
+	if nin.Text() != "OK" {
+		fmt.Fprintf(conn, "QUIT\r\n")
+		nin.Scan()
+		if nin.Text() == "GOODBYE" {
+			return
+		}
+	}
+
 	//Loop forever
 	for {
 		//Get data to send from the channel connecting the client and server
@@ -415,6 +426,16 @@ func client(input chan string, source string, ipaddr string) {
 		}
 		//Send data we got from the channel
 		fmt.Fprintf(conn, "DATA\r\n")
+		nin = bufio.NewScanner(bufio.NewReader(conn))
+		nin.Split(bufio.ScanWords)
+		nin.Scan()
+		if nin.Text() != "OK" {
+			fmt.Fprintf(conn, "QUIT\r\n")
+			nin.Scan()
+			if nin.Text() == "GOODBYE" {
+				return
+			}
+		}
 		final := addHeaders(data, source, ipaddr)
 		fmt.Fprintf(conn, final)
 
@@ -445,9 +466,12 @@ func server(output chan string, source string, isOriginator string) {
 	//nin.Split(bufio.ScanWords)
 	nin.Scan()
 	if nin.Text() != "HELLO 1.7.1" { //change to check global version number
+		conn.Write([]byte("NOK Unsupported version!\r\n"))
 		fmt.Println("Warning incorrect handshake response from Client\n")
 		fmt.Println(nin.Text())
 	}
+	conn.Write([]byte("OK At your service:-)\r\n"))
+
 	for {
 		//get DATA
 		nin = bufio.NewScanner(bufio.NewReader(conn))
@@ -456,6 +480,9 @@ func server(output chan string, source string, isOriginator string) {
 		mesg := ""
 		nextLine := ""
 		if nin.Text() == "DATA" {
+			conn.Write([]byte("OK Let me have it:-)\r\n"))
+			nin = bufio.NewScanner(bufio.NewReader(conn))
+			nin.Split(bufio.ScanLines)
 			for {
 				nin.Scan()
 				nextLine = nin.Text()
@@ -467,6 +494,8 @@ func server(output chan string, source string, isOriginator string) {
 		} else if nin.Text() == "QUIT" {
 			conn.Write([]byte("GOODBYE\r\n"))
 			return
+		} else {
+			conn.Write([]byte("NOK Unknown Command!\r\n"))
 		}
 		nChecksum := checksum(extractMess(mesg))
 		fmt.Println("Made checksum")
