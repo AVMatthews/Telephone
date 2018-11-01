@@ -238,6 +238,7 @@ func readHeaders(in string) map[string]string {
 				i = 0
 				next = 0
 				sendingTimestampString := "The Unique SendingTimestamps that touched this message are"
+				//fmt.Println(len(SendingTimestamps))
 				for i < len(SendingTimestamps) {
 					j := 0
 					for j < i {
@@ -253,6 +254,7 @@ func readHeaders(in string) map[string]string {
 					i++
 				}
 				if !in {
+					fmt.Println("adding timestamp: " + sendingTimestampString)
 					m["SendingTimestamp"] = sendingTimestampString
 				}
 
@@ -283,11 +285,11 @@ func readHeaders(in string) map[string]string {
 				newFromHost := strings.SplitAfter(sin.Text(), ": ")[1]
 				FromHosts = append(FromHosts, newFromHost)
 			}
-			if sin.Text() == "ToHost:" {
+			if strings.HasPrefix(sin.Text(), "ToHost:") {
 				newToHost := strings.SplitAfter(sin.Text(), ": ")[1]
 				ToHosts = append(ToHosts, newToHost)
 			}
-			if sin.Text() == "SendingTimestamp:" {
+			if strings.HasPrefix(sin.Text(), "SendingTimestamp:") {
 				newSendingTimestamp := strings.SplitAfter(sin.Text(), ": ")[1]
 				SendingTimestamps = append(SendingTimestamps, newSendingTimestamp)
 			}
@@ -407,7 +409,7 @@ func client(input chan string, source string, ipaddr string, origin int) {
 			text, _ := reader.ReadString('\n')
 			var chs string
 			chs = fmt.Sprintf("%.4X", checksum(text))
-			fmt.Println(chs)
+			//fmt.Println(chs)
 			fmt.Fprintf(conn, "DATA\r\n")
 			nin = bufio.NewScanner(bufio.NewReader(conn))
 			nin.Split(bufio.ScanWords)
@@ -515,6 +517,7 @@ func server(output chan string, source string, dest string, isOriginator string)
 			if nChecksum == oChecksum {
 				fmt.Println("Checksums are VALID")
 				headers := readHeaders(mesg)
+				//fmt.Println(headers)
 				fmt.Println("Number of Hops: " + headers["Hop"])
 				fmt.Println("MessageId: " + headers["MessageId"])
 				if headers["System"] != "The Unique Systems that touched this message are" {
