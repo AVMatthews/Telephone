@@ -600,9 +600,18 @@ func server(output chan string, source string, dest string, isOriginator string)
 
 		if nChecksum == oChecksum {
 			conn.Write([]byte("SUCCESS\r\n"))
+			if isOriginator == "1" {
+				output <- "SIGTERM"
+				continue
+			}
 			output <- mesg
+
 		} else {
 			conn.Write([]byte("WARN\r\n"))
+			if isOriginator == "1" {
+				output <- "SIGTERM"
+				continue
+			}
 			output <- mesg
 		}
 	}
