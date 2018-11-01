@@ -418,6 +418,18 @@ func client(input chan string, source string, ipaddr string, origin int) {
 			text, _ := reader.ReadString('\n')
 			var chs string
 			chs = fmt.Sprintf("%.4X", checksum(text))
+			fmt.Println(chs)
+			fmt.Fprintf(conn, "DATA\r\n")
+			nin = bufio.NewScanner(bufio.NewReader(conn))
+			nin.Split(bufio.ScanWords)
+			nin.Scan()
+			if nin.Text() != "OK" {
+				fmt.Fprintf(conn, "QUIT\r\n")
+				nin.Scan()
+				if nin.Text() == "GOODBYE" {
+					return
+				}
+			}
 			fmt.Fprintf(conn, ("Hop: 0\r\nMessageId: 1111\r\nMessageChecksum: " + chs + "\r\n\r\n" + text + "\r\n.\r\n"))
 			init = false
 		}
