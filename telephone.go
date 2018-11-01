@@ -31,7 +31,7 @@ import "C"
 const VERSION string = "1.7.1"
 
 func checksum(in string) uint16 {
-	fmt.Println("|" + in + "|")
+	// fmt.Println("|" + in + "|")
 	// var size C.size_t = C.size_t(len(in))
 	if len(in) == 0 {
 		return 0
@@ -361,7 +361,7 @@ func addHeaders(input string, srcIp string, destIp string) string {
 	return out
 }
 
-func client(input chan string, source string, ipaddr string) {
+func client(input chan string, source string, ipaddr string, origin int) {
 	//Open connection to server
 	conn, err := net.Dial("tcp", ipaddr)
 	if err != nil {
@@ -410,8 +410,17 @@ func client(input chan string, source string, ipaddr string) {
 		}
 	}
 
+	init := true
 	//Loop forever
 	for {
+		if origin == 1 && init {
+			reader := bufio.NewReader(os.Stdin)
+			text, _ := reader.ReadString('\n')
+			var chs string
+			chs = fmt.Sprintf("%.4X", checksum(text))
+			fmt.Fprintf(conn, ("Hop: -1\r\nMessageId: 1111\r\nMessageChecksum: " + chs + "\r\n\r\n" + text + "\r\n.\r\n"))
+			init = false
+		}
 		//Get data to send from the channel connecting the client and server
 		data := <-input
 		fmt.Println("Client: " + data)
@@ -498,9 +507,9 @@ func server(output chan string, source string, isOriginator string) {
 			conn.Write([]byte("NOK Unknown Command!\r\n"))
 		}
 		nChecksum := checksum(extractMess(mesg))
-		fmt.Println("Made checksum")
+		// fmt.Println("Made checksum")
 		oChecksum := readMesgChecksum(mesg)
-		fmt.Println("read Checksum")
+		// fmt.Println("read Checksum")
 
 		if isOriginator == "1" {
 			if nChecksum == oChecksum {
@@ -600,10 +609,10 @@ func main() {
 	}()
 
 	if os.Args[1] == "1" {
-		go client(comm, source, dest)
+		go client(comm, source, dest, 1)
 		server(comm, source, os.Args[1])
 	} else {
 		go server(comm, source, os.Args[1])
-		client(comm, source, dest)
+		client(comm, source, dest, 0)
 	}
 }
