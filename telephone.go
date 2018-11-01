@@ -28,7 +28,7 @@ import (
 // }
 import "C"
 
-const VERSION string = "1.7"
+const VERSION string = "1.7.1"
 
 func checksum(in string) uint16 {
 	fmt.Println("|" + in + "|")
@@ -51,7 +51,7 @@ func readHeaders(in string) map[string]string {
 		sin.Split(bufio.ScanWords)
 		for {
 			if !sin.Scan() {
-				return m
+				break
 			}
 			_, in := m["Hop"]
 			if sin.Text() == "Hop:" && !in {
@@ -64,6 +64,243 @@ func readHeaders(in string) map[string]string {
 				sin.Scan()
 				m["MessageId"] = sin.Text()
 				continue
+			}
+		}
+		sin = bufio.NewScanner(strings.NewReader(in))
+		sin.Split(bufio.ScanLines)
+
+		Systems := make([]string, 0)
+		Programs := make([]string, 0)
+		Authors := make([]string, 0)
+		Warnings := make([]string, 0)
+		Transforms := make([]string, 0)
+		FromHosts := make([]string, 0)
+		ToHosts := make([]string, 0)
+		SendingTimestamps := make([]string, 0)
+
+		for {
+			//fmt.Println("second for")
+			if !sin.Scan() {
+				_, in := m["System"]
+
+				//Make Slices into Strings to print
+				i := 0
+				next := 0
+				systemString := "The Unique Systems that touched this message are"
+				for i < len(Systems) {
+					j := 0
+					for j < i {
+						if Systems[i] == Systems[j] {
+							break
+						}
+						j++
+					}
+					if i == j {
+						next++
+						systemString = systemString + " (" + strconv.Itoa(next) + ") " + Systems[i]
+					}
+					i++
+				}
+				if !in {
+					m["System"] = systemString
+					//fmt.Println(systemString)
+				}
+
+				_, in = m["Program"]
+				i = 0
+				next = 0
+				programString := "The Unique Programs that touched this message are"
+				for i < len(Programs) {
+					j := 0
+					for j < i {
+						if Programs[i] == Programs[j] {
+							break
+						}
+						j++
+					}
+					if i == j {
+						next++
+						programString = programString + " (" + strconv.Itoa(next) + ") " + Programs[i]
+					}
+					i++
+				}
+				if !in {
+					m["Program"] = programString
+					//fmt.Println(systemString)
+				}
+
+				_, in = m["Authors"]
+				i = 0
+				next = 0
+				authorString := "The Unique Authors that touched this message are"
+				for i < len(Authors) {
+					j := 0
+					for j < i {
+						if Authors[i] == Authors[j] {
+							break
+						}
+						j++
+					}
+					if i == j {
+						next++
+						authorString = authorString + " (" + strconv.Itoa(next) + ") " + Authors[i]
+					}
+					i++
+				}
+				if !in {
+					m["Author"] = authorString
+					//fmt.Println(systemString)
+				}
+
+				_, in = m["Warning"]
+				i = 0
+				next = 0
+				warningString := "The Unique Warnings that touched this message are"
+				for i < len(Warnings) {
+					j := 0
+					for j < i {
+						if Warnings[i] == Warnings[j] {
+							break
+						}
+						j++
+					}
+					if i == j {
+						next++
+						warningString = warningString + " (" + strconv.Itoa(next) + ") " + Warnings[i]
+					}
+					i++
+				}
+				if !in {
+					m["Warning"] = warningString
+					//fmt.Println(systemString)
+				}
+
+				_, in = m["Transform"]
+				i = 0
+				next = 0
+				transformString := "The Unique Transforms that touched this message are"
+				for i < len(Transforms) {
+					j := 0
+					for j < i {
+						if Transforms[i] == Transforms[j] {
+							break
+						}
+						j++
+					}
+					if i == j {
+						next++
+						transformString = transformString + " (" + strconv.Itoa(next) + ") " + Transforms[i]
+					}
+					i++
+				}
+				if !in {
+					m["Transform"] = transformString
+					//fmt.Println(systemString)
+				}
+
+				_, in = m["FromHost"]
+				i = 0
+				next = 0
+				fromHostString := "The Unique FromHosts that touched this message are"
+				for i < len(FromHosts) {
+					j := 0
+					for j < i {
+						if FromHosts[i] == FromHosts[j] {
+							break
+						}
+						j++
+					}
+					if i == j {
+						next++
+						fromHostString = fromHostString + " (" + strconv.Itoa(next) + ") " + FromHosts[i]
+					}
+					i++
+				}
+				if !in {
+					m["FromHost"] = fromHostString
+					//fmt.Println(systemString)
+				}
+
+				_, in = m["ToHost"]
+				i = 0
+				next = 0
+				toHostString := "The Unique ToHosts that touched this message are"
+				for i < len(ToHosts) {
+					j := 0
+					for j < i {
+						if ToHosts[i] == ToHosts[j] {
+							break
+						}
+						j++
+					}
+					if i == j {
+						next++
+						toHostString = toHostString + " (" + strconv.Itoa(next) + ") " + ToHosts[i]
+					}
+					i++
+				}
+				if !in {
+					m["ToHost"] = toHostString
+					//fmt.Println(systemString)
+				}
+
+				_, in = m["SendingTimestamp"]
+				i = 0
+				next = 0
+				sendingTimestampString := "The Unique SendingTimestamps that touched this message are"
+				for i < len(SendingTimestamps) {
+					j := 0
+					for j < i {
+						if SendingTimestamps[i] == SendingTimestamps[j] {
+							break
+						}
+						j++
+					}
+					if i == j {
+						next++
+						sendingTimestampString = sendingTimestampString + " (" + strconv.Itoa(next) + ") " + SendingTimestamps[i]
+					}
+					i++
+				}
+				if !in {
+					m["SendingTimestamp"] = sendingTimestampString
+					//fmt.Println(systemString)
+				}
+
+				return m
+			}
+
+			if strings.HasPrefix(sin.Text(), "System:") {
+				newSystem := strings.SplitAfter(sin.Text(), ": ")[1]
+				Systems = append(Systems, newSystem)
+			}
+			if strings.HasPrefix(sin.Text(), "Program:") {
+				newProgram := strings.SplitAfter(sin.Text(), ": ")[1]
+				Programs = append(Programs, newProgram)
+			}
+			if strings.HasPrefix(sin.Text(), "Author:") {
+				newAuthor := strings.SplitAfter(sin.Text(), ": ")[1]
+				Authors = append(Authors, newAuthor)
+			}
+			if strings.HasPrefix(sin.Text(), "Warning:") {
+				newWarning := strings.SplitAfter(sin.Text(), ": ")[1]
+				Warnings = append(Warnings, newWarning)
+			}
+			if strings.HasPrefix(sin.Text(), "Transform:") {
+				newTransform := strings.SplitAfter(sin.Text(), ": ")[1]
+				Transforms = append(Transforms, newTransform)
+			}
+			if strings.HasPrefix(sin.Text(), "FromHost:") {
+				newFromHost := strings.SplitAfter(sin.Text(), ": ")[1]
+				FromHosts = append(FromHosts, newFromHost)
+			}
+			if sin.Text() == "ToHost:" {
+				newToHost := strings.SplitAfter(sin.Text(), ": ")[1]
+				ToHosts = append(ToHosts, newToHost)
+			}
+			if sin.Text() == "SendingTimestamp:" {
+				newSendingTimestamp := strings.SplitAfter(sin.Text(), ": ")[1]
+				SendingTimestamps = append(SendingTimestamps, newSendingTimestamp)
 			}
 		}
 	}
@@ -190,7 +427,7 @@ func client(input chan string, source string, ipaddr string) {
 
 }
 
-func server(output chan string, source string) {
+func server(output chan string, source string, isOriginator string) {
 	ip_port := strings.SplitAfter(source, ":")
 	//Start listening on Port
 	c, err := net.Listen("tcp", "localhost:"+ip_port[1])
@@ -207,7 +444,7 @@ func server(output chan string, source string) {
 	nin := bufio.NewScanner(bufio.NewReader(conn))
 	//nin.Split(bufio.ScanWords)
 	nin.Scan()
-	if nin.Text() != "HELLO 1.7" { //change to check global version number
+	if nin.Text() != "HELLO 1.7.1" { //change to check global version number
 		fmt.Println("Warning incorrect handshake response from Client\n")
 		fmt.Println(nin.Text())
 	}
@@ -231,13 +468,79 @@ func server(output chan string, source string) {
 			conn.Write([]byte("GOODBYE\r\n"))
 			return
 		}
-		// fmt.Println("mesg: " + mesg)
-		//fmt.Println("scanned")
-		//mesg := extractMess(nin.Text())
 		nChecksum := checksum(extractMess(mesg))
 		fmt.Println("Made checksum")
 		oChecksum := readMesgChecksum(mesg)
 		fmt.Println("read Checksum")
+
+		if isOriginator == "1" {
+			if nChecksum == oChecksum {
+				fmt.Println("Checksums are VALID")
+				headers := readHeaders(mesg)
+				fmt.Println("Number of Hops: " + headers["Hop"])
+				fmt.Println("MessageId: " + headers["MessageId"])
+				if headers["System"] != "The Unique Systems that touched this message are" {
+					fmt.Println(headers["System"])
+				}
+				if headers["Program"] != "The Unique Programs that touched this message are" {
+					fmt.Println(headers["Program"])
+				}
+				if headers["Author"] != "The Unique Authors that touched this message are" {
+					fmt.Println(headers["Author"])
+				}
+				if headers["FromHost"] != "The Unique FromHosts that touched this message are" {
+					fmt.Println(headers["FromHost"])
+				}
+				if headers["ToHost"] != "The Unique ToHosts that touched this message are" {
+					fmt.Println(headers["ToHost"])
+				}
+				if headers["Warning"] != "The Unique Warnings that touched this message are" {
+					fmt.Println(headers["Warning"])
+				}
+				if headers["Transform"] != "The Unique Transforms that touched this message are" {
+					fmt.Println(headers["Transform"])
+				}
+				if headers["SendingTimestamp"] != "The Unique SendingTimestamps that touched this message are" {
+					fmt.Println(headers["SendingTimestamp"])
+				}
+			} else {
+				fmt.Println("Checksums are INVALID")
+				headers := readHeaders(mesg)
+				fmt.Println("Number of Hops: " + headers["Hop"])
+				fmt.Println("MessageId: " + headers["MessageId"])
+				if headers["System"] != "The Unique Systems that touched this message are" {
+					fmt.Println(headers["System"])
+				}
+				if headers["Program"] != "The Unique Programs that touched this message are" {
+					fmt.Println(headers["Program"])
+				}
+				if headers["Author"] != "The Unique Authors that touched this message are" {
+					fmt.Println(headers["Author"])
+				}
+				if headers["FromHost"] != "The Unique FromHosts that touched this message are" {
+					fmt.Println(headers["FromHost"])
+				}
+				if headers["ToHost"] != "The Unique ToHosts that touched this message are" {
+					fmt.Println(headers["ToHost"])
+				}
+				if headers["Warning"] != "The Unique Warnings that touched this message are" {
+					fmt.Println(headers["Warning"])
+				}
+				if headers["Transform"] != "The Unique Transforms that touched this message are" {
+					fmt.Println(headers["Transform"])
+				}
+				if headers["SendingTimestamp"] != "The Unique SendingTimestamps that touched this message are" {
+					fmt.Println(headers["SendingTimestamp"])
+				}
+			}
+
+		} else {
+			if nChecksum == oChecksum {
+				fmt.Println("Checksums are VALID")
+			} else {
+				fmt.Println("Checksums are INVALID")
+			}
+		}
 
 		if nChecksum == oChecksum {
 			conn.Write([]byte("SUCCESS\r\n"))
@@ -247,29 +550,6 @@ func server(output chan string, source string) {
 			output <- mesg
 		}
 	}
-	/*nin.SplitAfter("\n")
-	mesg = ""
-	nextLine = ""
-	for {
-		nextLine = in.Scan()
-		if nextLine == "\r\n"{
-			break
-		}
-	}
-	for {
-		nextLine = nin.ScanLines();
-		if mesg == "."{
-
-		} else {
-			mesg =
-		}
-	}*/
-	//for { //Maybe make this loop surround aroudn the handshking too?
-	//message, err := bufio.NewReader(conn).ReadString("\r\n.\r\n")
-	//}
-	//This line is for testing the client
-	//output <- "Hop: 1\r\nMessageId: 3456\r\nFromHost: 192.168.0.12:9879\r\nToHost: 192.168.0.4:8888\r\nSystem: WINDOWS/XP\r\nProgram: JAVA/JAVAC\r\nAuthor: Frodo Baggins\r\nSendingTimestamp: 17:00:00:000\r\nMessageChecksum: 432F\r\nHeadersChecksum: A350\r\nHop: 0\r\nMessageId: 3456\r\nFromHost: 192.168.0.1:34953\r\nToHost: 192.168.0.12:8888\r\nSystem: LINIX/DEBIAN/R3.0\r\nProgram: C++/GCC\r\nAuthor: Alex, J./Jacky Elton/David Wang\r\nSendingTimestamp: 16:59:59:009\r\nMessageChecksum: 423F\r\nHeadersChecksum: 6F38\r\n\r\nHi how are you? I'm good.\r\n.\r\n"
-	// output <- "SIGTERM"
 }
 
 func main() {
@@ -292,9 +572,9 @@ func main() {
 
 	if os.Args[1] == "1" {
 		go client(comm, source, dest)
-		server(comm, source)
+		server(comm, source, os.Args[1])
 	} else {
-		go server(comm, source)
+		go server(comm, source, os.Args[1])
 		client(comm, source, dest)
 	}
 }
