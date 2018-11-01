@@ -418,7 +418,7 @@ func client(input chan string, source string, ipaddr string, origin int) {
 			text, _ := reader.ReadString('\n')
 			var chs string
 			chs = fmt.Sprintf("%.4X", checksum(text))
-			fmt.Fprintf(conn, ("Hop: -1\r\nMessageId: 1111\r\nMessageChecksum: " + chs + "\r\n\r\n" + text + "\r\n.\r\n"))
+			fmt.Fprintf(conn, ("Hop: 0\r\nMessageId: 1111\r\nMessageChecksum: " + chs + "\r\n\r\n" + text + "\r\n.\r\n"))
 			init = false
 		}
 		//Get data to send from the channel connecting the client and server
